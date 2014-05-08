@@ -13,10 +13,6 @@ module  AdLeads
       end
     end
 
-    def get_promotion(id)
-      get "/api/v1/promotions/#{id}"
-    end
-
     def create(type, obj)
       if !PROMOTABLE_TYPES.include?(type)
         raise UnsupportedPromotionType.new("Unsupported promotion type: #{type}!")
