@@ -5,16 +5,17 @@ module AdLeads
       yield self
     end
 
-    VALID_CONNECTION_KEYS = [:endpoint, :user_agent].freeze
-    VALID_OPTIONS_KEYS    = [:api_key, :authorization, :format].freeze
+    VALID_CONNECTION_KEYS = [:endpoint, :token_endpoint, :user_agent].freeze
+    VALID_OPTIONS_KEYS    = [:client_id, :principle, :format].freeze
     VALID_CONFIG_KEYS     = VALID_CONNECTION_KEYS + VALID_OPTIONS_KEYS
 
-    DEFAULT_ENDPOINT    = ''
+    DEFAULT_ENDPOINT    = 'https://api.adleads.com'
+    DEFAULT_TOKEN_ENDPOINT  = 'https://auth.adleads.com'
     DEFAULT_USER_AGENT  = "AdLeads API Ruby Gem #{AdLeads::VERSION}".freeze
 
-    DEFAULT_API_KEY      = nil
-    DEFAULT_AUTHORIZATION = 'Token access_token'
     DEFAULT_FORMAT       = :json
+    DEFAULT_CLIENT_ID    = 'client_id'
+    DEFAULT_PRINCIPLE    = 'principle'
 
     attr_accessor *VALID_CONFIG_KEYS
 
@@ -29,9 +30,10 @@ module AdLeads
 
     def reset
       self.endpoint   = DEFAULT_ENDPOINT
+      self.token_endpoint   = DEFAULT_TOKEN_ENDPOINT
       self.user_agent = DEFAULT_USER_AGENT
-      self.api_key    = DEFAULT_API_KEY
-      self.authorization    = DEFAULT_AUTHORIZATION
+      self.client_id    = DEFAULT_CLIENT_ID
+      self.principle    = DEFAULT_PRINCIPLE
       self.format     = DEFAULT_FORMAT
     end
 
