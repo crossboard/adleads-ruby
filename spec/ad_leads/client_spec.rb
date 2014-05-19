@@ -1,5 +1,6 @@
 require 'spec_helper'
 require './spec/fixtures/deal.rb'
+require 'pry'
 
 describe AdLeads::Client do
   let(:client) { AdLeads::Client.new }
@@ -72,7 +73,7 @@ describe AdLeads::Client do
           puts "upload image using etag : #{etag}"
           file_name = 'test.jpg'
           response = client.upload_image(ids, etag, file_name)
-          expect(response.status).to eq(200)
+          expect(respond_tose.status).to eq(200)
         end
       end
 
