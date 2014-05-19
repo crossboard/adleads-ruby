@@ -14,13 +14,20 @@ describe 'configuration' do
 
   it 'returns default values' do
     keys.each do |key|
-      expect(AdLeads.send(key)).to eq AdLeads::Configuration.const_get("DEFAULT_#{key.upcase}")
+      expect(AdLeads.send(key)).to eq AdLeads::Configuration.
+        const_get("DEFAULT_#{key.upcase}")
     end
   end
 
-  describe '#api_key' do
+  describe '#client_id' do
     it 'should return default key' do
-      expect(AdLeads.api_key).to eq AdLeads::Configuration::DEFAULT_API_KEY
+      expect(AdLeads.client_id).to eq AdLeads::Configuration::DEFAULT_CLIENT_ID
+    end
+  end
+
+  describe '#principle' do
+    it 'should return default key' do
+      expect(AdLeads.principle).to eq AdLeads::Configuration::DEFAULT_PRINCIPLE
     end
   end
 

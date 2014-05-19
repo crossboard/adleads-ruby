@@ -1,5 +1,6 @@
 require 'faraday'
 require 'json'
+
 module  AdLeads
   class Client
     PROMOTABLE_TYPES = [:promotion]
@@ -13,42 +14,118 @@ module  AdLeads
       end
     end
 
-    def create(type, obj)
-      if !PROMOTABLE_TYPES.include?(type)
-        raise UnsupportedPromotionType.new("Unsupported promotion type: #{type}!")
-      end
-      post('/api/v1/promotions', class_for(type).promotion_params(obj))
-    end
-
-    def connection
-      @connection ||= Faraday.new(:url => endpoint) do |faraday|
-        faraday.headers['Content-Type'] = 'application/json'
-        faraday.authorization :Token, authorization
-        faraday.adapter  :httpclient  # make requests with Net::HTTP
+    def configure_campaign_signups(ad_campaign_id, etag, params)
+      path = "/campaigns/#{ad_campaign_id}/signupdelivery"
+      connection_with_etag_match(etag).send(:post, path) do |request|
+        request.body = params if params
       end
     end
 
-    def get(path)
-      request(:get, path)
+    def create_ad(creative_group_id, type)
+      post("/creativegroups/#{creative_group_id}/creatives", type)
+    end
+
+    def create_campaign(params)
+      post('/campaigns', params)
+    end
+
+    def create_content_holder(ids, type)
+      path = "/creativegroups/#{ids[:group]}/creatives/#{ids[:creative]}/images"
+      post(path, type)
+    end
+
+    def create_creative_group(params)
+      post('/creativegroups', params)
+    end
+
+    def get_campaign_etag(ad_campaign_id)
+      response = get("/campaigns/#{ad_campaign_id}")
+      response.headers['ETag']
+    end
+
+    def get_campaign_status(ad_campaign_id)
+      response = get("/campaigns/#{ad_campaign_id}")
+      JSON.parse(response.body)['status']
+    end
+
+    def get_content_etag(ids)
+      get("/creativegroups/#{ids[:group]}/creatives/#{ids[:creative]}/images/#{ids[:image]}")
+    end
+
+    def get_reports(params)
+      get("/reports/campaign/report", params)
+    end
+
+    def launch_campaign(ad_campaign_id, etag, params = nil)
+      path = "/campaigns/#{ad_campaign_id}/launch"
+      connection_with_etag_match(etag).send(:post, path) do |request|
+        request.body = params if params
+      end
+    end
+
+    # def pause_campaign(ad_campaign_id, etag)
+    #   path = "/campaigns/#{ad_campaign_id}/pause"
+    #   connection_with_etag_match(etag).send(:post, path)
+    # end
+
+    def update_campaign(ad_campaign_id, params = {})
+      post("/campaigns/#{ad_campaign_id}", params)
+    end
+
+    def upload_image(ids, etag, file)
+      path = "/creativegroups/#{ids[:group]}/creatives/#{ids[:creative]}/images/#{ids[:image]}/file"
+      image_payload = {
+        file: Faraday::UploadIO.new(file, 'image/jpeg')
+      }
+      connection_with_etag_match(etag).post(path, image_payload)
+    end
+
+    def verify_campaign(ad_campaign_id)
+      get("/campaigns/#{ad_campaign_id}/plan")
+    end
+
+    def get(path, params = {})
+      request(:get, path, params)
     end
 
     def post(path, params = {})
       request(:post, path, params)
     end
 
+    private
+
+    def connection
+      @connection ||= Faraday.new(url: endpoint) do |faraday|
+        faraday.headers['Accept'] = 'application/json'
+        faraday.request  :url_encoded
+        faraday.authorization :Bearer, token
+        faraday.adapter  :httpclient  # make requests with Net::HTTP
+        faraday.request :url_encoded
+      end
+    end
+
+    def token
+      @token ||= AdLeads::Token.new(client_id: client_id, principle: principle).token
+    end
+
+    def connection_with_etag_match(etag)
+      Faraday.new(:url => endpoint) do |faraday|
+        faraday.headers['If-Match'] = etag
+        faraday.request  :multipart
+        faraday.request  :url_encoded
+        faraday.authorization :Bearer, token
+        faraday.adapter  :net_http
+      end
+    end
+
     def request(method, path, params = {})
-      res = connection.send(method, path) do |request|
-        request.body = JSON.generate(params) if params
+      connection.send(method, path) do |request|
+        request.params = params if method == :get
+        request.body = params if method == :post
       end
       # rescue Faraday::Error::TimeoutError, Timeout::Error => error
       # rescue Faraday::Error::ClientError, JSON::ParserError => error
     end
 
-    private
-    def class_for(type)
-      Kernel.const_get("AdLeads::#{type.to_s.split('_').collect(&:capitalize).join}")
-    end
   end
-
-  class UnsupportedPromotionType < StandardError; end
 end

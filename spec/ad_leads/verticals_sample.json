@@ -1,0 +1,145 @@
+{
+  "name": "Root",
+  "displayName": "Root",
+  "description": "This is a default root node!",
+  "children": [
+    {
+      "id": 82,
+      "name": "apparel",
+      "displayName": "apparel",
+      "description": "apparel"
+    },
+    {
+      "id": 307,
+      "name": "automotive",
+      "displayName": "automotive",
+      "description": "automotive",
+      "relatedVerticals": [
+        310
+      ]
+    },
+    {
+      "id": 64,
+      "name": "beauty_n_fitness",
+      "displayName": "beauty & fitness",
+      "description": "beauty & fitness"
+    },
+    {
+      "id": 1,
+      "name": "consumer_electronics",
+      "displayName": "consumer electronics",
+      "description": "consumer electronics"
+    },
+    {
+      "id": 46,
+      "name": "daily_deals",
+      "displayName": "daily deals",
+      "description": "daily deals"
+    },
+    {
+      "id": 288,
+      "name": "education",
+      "displayName": "education",
+      "description": "education"
+    },
+    {
+      "id": 78,
+      "name": "entertainment",
+      "displayName": "entertainment",
+      "description": "entertainment"
+    },
+    {
+      "id": 123,
+      "name": "finance",
+      "displayName": "finance",
+      "description": "finance",
+      "relatedVerticals": [
+        310
+      ]
+    },
+    {
+      "id": 95,
+      "name": "food_n_drink",
+      "displayName": "food & drink",
+      "description": "food & drink"
+    },
+    {
+      "id": 59,
+      "name": "health",
+      "displayName": "health",
+      "description": "health"
+    },
+    {
+      "id": 108,
+      "name": "home_n_garden",
+      "displayName": "home & garden",
+      "description": "home & garden"
+    },
+    {
+      "id": 27,
+      "name": "internet_n_telecom",
+      "displayName": "internet & telecom",
+      "description": "internet & telecom"
+    },
+    {
+      "id": 18,
+      "name": "non_profit",
+      "displayName": "Non-Profit",
+      "description": "non-profit"
+    },
+    {
+      "id": 311,
+      "name": "other",
+      "displayName": "other",
+      "description": "other"
+    },
+    {
+      "id": 156,
+      "name": "parenting",
+      "displayName": "parenting",
+      "description": "parenting"
+    },
+    {
+      "id": 8,
+      "name": "pets_n_animals",
+      "displayName": "pets & animals",
+      "description": "pets & animals"
+    },
+    {
+      "id": 308,
+      "name": "professional_services",
+      "displayName": "professional services",
+      "description": "professional services",
+      "relatedVerticals": [
+        310
+      ]
+    },
+    {
+      "id": 309,
+      "name": "real_estate",
+      "displayName": "real estate",
+      "description": "real estate",
+      "relatedVerticals": [
+        310
+      ]
+    },
+    {
+      "id": 127,
+      "name": "shopping",
+      "displayName": "shopping",
+      "description": "shopping"
+    },
+    {
+      "id": 256,
+      "name": "sports",
+      "displayName": "Sports",
+      "description": "Sports"
+    },
+    {
+      "id": 30,
+      "name": "travel",
+      "displayName": "travel",
+      "description": "travel"
+    }
+  ]
+}
