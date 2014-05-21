@@ -1,5 +1,4 @@
 require 'spec_helper'
-require './spec/fixtures/deal.rb'
 require 'pry'
 
 describe AdLeads::Client do
@@ -8,7 +7,7 @@ describe AdLeads::Client do
   let(:config_keys) { AdLeads::Configuration::VALID_CONFIG_KEYS }
   #When creating a new token, set this value to output from 'creates creative group' spec
   let(:creative_group_id) { 12858 }
-  let(:token) { 'a2b43ab1-8d09-4ec4-8568-7bb1872cc63b' }
+  let(:token) { '067f6080-913f-4b7b-9034-8240b976094a' }
 
   before do
     client.stub(:token).and_return(token)
@@ -73,7 +72,7 @@ describe AdLeads::Client do
           puts "upload image using etag : #{etag}"
           file_name = 'test.jpg'
           response = client.upload_image(ids, etag, file_name)
-          expect(respond_tose.status).to eq(200)
+          expect(response.status).to eq(200)
         end
       end
 

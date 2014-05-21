@@ -5,7 +5,6 @@ require 'pry'
 module AdLeads
   class Campaign
     attr_accessor :creative_group_id, :creatives_id, :image_id, :image_etag, :campaign_id, :campaign_etag
-
     attr_accessor *Configuration::VALID_CONFIG_KEYS
 
     BTL_URL = 'www.myurl.com'
@@ -27,6 +26,7 @@ module AdLeads
       verify_campaign
       get_campaign_etag
       configure_campaign_signups
+      get_campaign_etag
       launch_campaign
     end
 
@@ -35,72 +35,61 @@ module AdLeads
     end
 
     def create_creative_group
-      params = {
-        'name' => @ad_campaign_obj[:campaign_info][:name],
-        'productName' => @ad_campaign_obj[:content_info][:name],
-        'privacyPolicyUrl' => @ad_campaign_obj[:content_info][:privacy]
-      }
-      response = post('/creativegroups', params)
+      response = post('/creativegroups', cg_params)
       @creative_group_id = process_response(response)
     end
 
     def create_ad
-      params = {
-        'type' => @ad_campaign_obj[:content_info][:type]
-      }
-      response = post("/creativegroups/#{@creative_group_id}/creatives", params)
+      response = post("/creativegroups/#{@creative_group_id}/creatives", ad_params)
       @creatives_id = process_response(response)
     end
-
+    #in gem
     def create_content_holder
-      params = {
-        'type' => @ad_campaign_obj[:content_info][:image_type]
-      }
       path = "/creativegroups/#@creative_group_id/creatives/#{@creatives_id}/images"
-      response = post(path, params)
+      response = post(path, content_holder_params)
       @image_id = process_response(response)
     end
 
     def get_content_etag
-      response = get("/creativegroups/#{@creative_group_id}/creatives/#{@creatives_id}/images/#{@image_id}")
+      path = "/creativegroups/#@creative_group_id/creatives/#{@creatives_id}/images/#{@image_id}"
+      response = get(path)
       @image_etag = response.headers['ETag']
     end
-
+    #in gem
     def upload_image
       file = @ad_campaign_obj[:content_info][:file]
       path = "/creativegroups/#{@creative_group_id}/creatives/#{@creatives_id}/images/#{@image_id}/file"
       image_payload = {
         file: Faraday::UploadIO.new(file, 'image/jpeg')
       }
-      binding.pry
       connection_with_etag_match(@image_etag).post(path, image_payload)
     end
 
     def create_campaign
-      response = post('/campaigns', params)
+      response = post('/campaigns', campaign_params)
       @campaign_id = process_response(response)
     end
 
     def get_campaign_etag
-      response = get("/campaigns/#{ad_campaign_id}")
+      path = "/campaigns/#{@campaign_id}"
+      response = get(path)
       @campaign_etag = response.headers['ETag']
     end
 
     def configure_campaign_signups
-      params = {
-        'dataSink' => 'RealtimeHTTP',
-        'method' => 'POST',
-        'url' => BTL_URL
-      }
       path = "/campaigns/#{@campaign_id}/signupdelivery"
       connection_with_etag_match(@campaign_etag).send(:post, path) do |request|
-        request.body = params
+        request.body = signup_params
       end
     end
 
     def launch_campaign
       path = "/campaigns/#{@campaign_id}/launch"
-      connection_with_etag_match(@campaign_etag).send(:post, path)
+      reponse = connection_with_etag_match(@campaign_etag).send(:post, path)
+    end
+
+    def verify_campaign
+      response = get("/campaigns/#{@campaign_id}/plan")
     end
 
     def get(path, params = {})
@@ -112,6 +101,58 @@ module AdLeads
     end
 
     private
+
+    def cg_params
+      {
+        'name' => @ad_campaign_obj[:campaign_info][:name],
+        'productName' => @ad_campaign_obj[:content_info][:name],
+        'active' => @ad_campaign_obj[:content_info][:active],
+        'privacyPolicyUrl' => @ad_campaign_obj[:content_info][:privacy]
+      }
+    end
+
+    def ad_params
+      {
+        'name' => @ad_campaign_obj[:content_info][:name],
+        'type' => @ad_campaign_obj[:content_info][:type],
+        ##mobile
+        'headerText' => @ad_campaign_obj[:content_info][:headerText],
+        'bodyText' => @ad_campaign_obj[:content_info][:bodyText],
+        ##email
+        'fromAddress' => @ad_campaign_obj[:campaign_info][:email],
+        'subject' => @ad_campaign_obj[:content_info][:subject],
+        'companyName' => @ad_campaign_obj[:campaign_info][:dba],
+        'mailingAddress' => @ad_campaign_obj[:campaign_info][:address],
+        'calltoAction' => @ad_campaign_obj[:campaign_info][:cta],
+        'preHeader' => @ad_campaign_obj[:campaign_info][:pre_header]
+      }
+    end
+
+    def content_holder_params
+      {
+        'type' => @ad_campaign_obj[:content_info][:image_type]
+      }
+    end
+
+    def campaign_params
+      {
+        'name' => @ad_campaign_obj[:content_info][:name],
+        'verticals' =>  @ad_campaign_obj[:content_info][:verticals],
+        'offerIncentiveCategory' => @ad_campaign_obj[:content_info][:incentives],
+        'collectedFields' => @ad_campaign_obj[:content_info][:collected_fields],
+        'budget' => @ad_campaign_obj[:campaign_info][:spend],
+        'creativeGroups' => @creative_group_id
+      }
+    end
+
+    def signup_params
+      {
+        'dataSink' => 'RealtimeHTTP',
+        'method' => 'POST',
+        'url' => BTL_URL
+      }
+    end
+
     def connection
       @connection ||= Faraday.new(url: endpoint) do |faraday|
         faraday.headers['Accept'] = 'application/json'

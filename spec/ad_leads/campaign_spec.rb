@@ -1,12 +1,11 @@
 require 'spec_helper'
-require './spec/fixtures/ad_campaign_obj.rb'
 require 'pry'
 
 describe AdLeads::Campaign do
   let(:campaign) { AdLeads::Campaign.new }
   let(:connection) { campaign.connection }
   let(:config_keys) { AdLeads::Configuration::VALID_CONFIG_KEYS }
-  let(:token) { 'a2b43ab1-8d09-4ec4-8568-7bb1872cc63b' }
+  let(:token) { '067f6080-913f-4b7b-9034-8240b976094a' }
 
   before do
     campaign.stub(:token).and_return(token)
@@ -20,7 +19,8 @@ describe AdLeads::Campaign do
     spend: 250,
     time_start: 011220131212,
     time_start: 011220131412,
-    name: 'My campaign'
+    name: 'My campaign',
+    launched: false
     },
   content_info: {
     name: 'ad name',
@@ -28,13 +28,16 @@ describe AdLeads::Campaign do
     headerText: 'get your ad on this phone today',
     bodyText: 'this is mobile ad body copy',
     privacy: 'http://privacy_url',
-    image_type: 'logoImage',
-    file: 'test.jpg'
+    image_type: 'LogoImage',
+    file: 'test.jpg',
+    verticals: '82',
+    incentives: '5',
+    collected_fields: 'firstname,lastname,email'
   }
 }
 
   it 'runs campaign_kickoff script' do
     response = campaign.campaign_kickoff(ad_campaign_obj)
-    expect(response).to eq(200)
+    expect(JSON.parse(response.body)['result']).to eq(true)
   end
 end
