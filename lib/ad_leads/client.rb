@@ -3,6 +3,8 @@ require 'json'
 
 module  AdLeads
   class Client
+    attr_accessor :creative_group_id, :creatives_id, :image_id, :image_etag, :campaign_id, :campaign_etag
+
     PROMOTABLE_TYPES = [:promotion]
 
     attr_accessor *Configuration::VALID_CONFIG_KEYS
@@ -63,10 +65,10 @@ module  AdLeads
       end
     end
 
-    # def pause_campaign(ad_campaign_id, etag)
-    #   path = "/campaigns/#{ad_campaign_id}/pause"
-    #   connection_with_etag_match(etag).send(:post, path)
-    # end
+    def pause_campaign(ad_campaign_id, etag)
+      path = "/campaigns/#{ad_campaign_id}/pause"
+      connection_with_etag_match(etag).send(:post, path)
+    end
 
     def update_campaign(ad_campaign_id, params = {})
       post("/campaigns/#{ad_campaign_id}", params)

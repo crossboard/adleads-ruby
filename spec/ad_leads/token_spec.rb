@@ -1,5 +1,4 @@
 require 'spec_helper'
-require './spec/fixtures/deal.rb'
 
 describe AdLeads::Token do
   let(:config_keys) { AdLeads::Configuration::VALID_CONFIG_KEYS }
