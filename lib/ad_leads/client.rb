@@ -3,10 +3,6 @@ require 'json'
 
 module  AdLeads
   class Client
-    attr_accessor :creative_group_id, :creatives_id, :image_id, :image_etag, :campaign_id, :campaign_etag
-
-    PROMOTABLE_TYPES = [:promotion]
-
     attr_accessor *Configuration::VALID_CONFIG_KEYS
 
     def initialize(options={})
@@ -16,11 +12,9 @@ module  AdLeads
       end
     end
 
-    def configure_campaign_signups(ad_campaign_id, etag, params)
+    def configure_campaign_signups(ad_campaign_id, etag, params = {})
       path = "/campaigns/#{ad_campaign_id}/signupdelivery"
-      connection_with_etag_match(etag).send(:post, path) do |request|
-        request.body = params if params
-      end
+      request(:post, path, params.merge(etag: etag))
     end
 
     def create_ad(creative_group_id, type)
@@ -58,16 +52,14 @@ module  AdLeads
       get("/reports/campaign/report", params)
     end
 
-    def launch_campaign(ad_campaign_id, etag, params = nil)
+    def launch_campaign(ad_campaign_id, etag, params = {})
       path = "/campaigns/#{ad_campaign_id}/launch"
-      connection_with_etag_match(etag).send(:post, path) do |request|
-        request.body = params if params
-      end
+      request(:post, path, params.merge(etag: etag))
     end
 
     def pause_campaign(ad_campaign_id, etag)
       path = "/campaigns/#{ad_campaign_id}/pause"
-      connection_with_etag_match(etag).send(:post, path)
+      request(:post, path, etag: etag)
     end
 
     def update_campaign(ad_campaign_id, params = {})
@@ -76,10 +68,8 @@ module  AdLeads
 
     def upload_image(ids, etag, file)
       path = "/creativegroups/#{ids[:group]}/creatives/#{ids[:creative]}/images/#{ids[:image]}/file"
-      image_payload = {
-        file: Faraday::UploadIO.new(file, 'image/jpeg')
-      }
-      connection_with_etag_match(etag).post(path, image_payload)
+      params = { file: Faraday::UploadIO.new(file, 'image/jpeg') }
+      request(:post, path, params.merge(etag: etag))
     end
 
     def verify_campaign(ad_campaign_id)
@@ -96,12 +86,22 @@ module  AdLeads
 
     private
 
-    def connection
-      @connection ||= Faraday.new(url: endpoint) do |faraday|
-        faraday.headers['Accept'] = 'application/json'
-        faraday.request  :url_encoded
+    def etag_opts(etag)
+      {
+        headers: { 'If-Match' => etag },
+        multipart: true
+      }
+    end
+
+    def connection(opts = {})
+      opts[:headers] ||= { 'Accept' => 'application/json' }
+
+      Faraday.new(url: endpoint) do |faraday|
+        faraday.headers = opts[:headers]
+        faraday.request :multipart if opts[:multipart]
+
         faraday.authorization :Bearer, token
-        faraday.adapter  :httpclient  # make requests with Net::HTTP
+        faraday.adapter  :httpclient
         faraday.request :url_encoded
       end
     end
@@ -110,20 +110,21 @@ module  AdLeads
       @token ||= AdLeads::Token.new(client_id: client_id, principle: principle).token
     end
 
-    def connection_with_etag_match(etag)
-      Faraday.new(:url => endpoint) do |faraday|
-        faraday.headers['If-Match'] = etag
-        faraday.request  :multipart
-        faraday.request  :url_encoded
-        faraday.authorization :Bearer, token
-        faraday.adapter  :net_http
-      end
-    end
-
     def request(method, path, params = {})
-      connection.send(method, path) do |request|
+      etag = params.delete(:etag)
+      opts = etag ? etag_opts(etag) : {}
+
+      response = connection(opts).send(method, path) do |request|
         request.params = params if method == :get
         request.body = params if method == :post
+      end
+
+      # Retry if etag mismatch
+      if response.status == 412
+        new_etag = get_etag(path)
+        request(method, path, params.merge(etag: new_etag))
+      else
+        response
       end
       # rescue Faraday::Error::TimeoutError, Timeout::Error => error
       # rescue Faraday::Error::ClientError, JSON::ParserError => error
