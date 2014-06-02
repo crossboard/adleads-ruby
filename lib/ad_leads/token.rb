@@ -29,7 +29,7 @@ module  AdLeads
 
     def token
       unless @token
-        response = token_connection.post('/oauth/token') do |conn|
+        response = connection.post('/oauth/token') do |conn|
           conn.params = token_request_params
         end
         @token = JSON.parse(response.body)['access_token']
@@ -37,8 +37,8 @@ module  AdLeads
       @token
     end
 
-    def token_connection
-      @token_connection ||= Faraday.new(url: token_endpoint) do |faraday|
+    def connection
+      @connection ||= Faraday.new(url: token_endpoint) do |faraday|
         faraday.headers['Accept'] = 'application/json'
         faraday.adapter :httpclient  # make requests with Net::HTTP
         faraday.request :url_encoded
