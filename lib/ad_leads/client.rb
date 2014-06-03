@@ -83,13 +83,6 @@ module  AdLeads
         request.body = params if method == :post
       end
 
-      # Retry if etag mismatch
-      if response.status == 412
-        new_etag = get_etag(path)
-        request(method, path, params.merge(etag: new_etag))
-      else
-        response
-      end
       # rescue Faraday::Error::TimeoutError, Timeout::Error => error
       # rescue Faraday::Error::ClientError, JSON::ParserError => error
     end

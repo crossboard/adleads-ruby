@@ -7,20 +7,21 @@ class AdLeads::Image < AdLeads::Base
     @ad_id = opts[:ad_id]
   end
 
-  def create!(params)
-    self.response = client.post(root_path, params)
-  end
-
   def ids
     { group: creative_group_id, creative: ad_id }
   end
 
   def upload!(file)
-    params = {
+    with_etag do
+      client.post(image_upload_path, image_upload_params(file))
+    end
+  end
+
+  def image_upload_params(file)
+    {
       file: Faraday::UploadIO.new(file, 'image/jpeg'),
       etag: etag
     }
-    client.post(image_upload_path, params)
   end
 
   def image_upload_path

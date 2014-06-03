@@ -4,6 +4,7 @@ describe AdLeads::Campaign do
   let(:campaign) { AdLeads::Campaign.new() }
   let(:client) { campaign.client }
   let(:params) { {} }
+  let(:http_success) { double(:http_success, status: 200) }
 
   it 'inherits from AdLeads::Base' do
     expect(campaign.class.ancestors).to include AdLeads::Base
@@ -29,8 +30,6 @@ describe AdLeads::Campaign do
       expect(client).to receive(:post).with('/campaigns/1', params)
       campaign.update!(params)
     end
-
-    it 'assigns #response'
   end
 
   describe '#verify!' do
@@ -40,20 +39,24 @@ describe AdLeads::Campaign do
       expect(client).to receive(:get).with('/campaigns/1/plan')
       campaign.verify!
     end
-
-    it 'assigns #response'
   end
 
   describe '#launch!' do
-    before { campaign.instance_variable_set(:@id, 1) }
-    before { campaign.stub(:etag) { 'Fake etag' } }
+    before do
+      campaign.stub(:id) { 1 }
+      campaign.stub(:etag) { 'Fake etag' }
+    end
 
     it 'posts to AdLeads::Campaign#launch_campaign_path' do
-      expect(client).to receive(:post).with('/campaigns/1/launch', { etag: 'Fake etag'})
+      expect(client).to receive(:post).with('/campaigns/1/launch', { etag: 'Fake etag'}).and_return(http_success)
       campaign.launch!
     end
 
-    it 'assigns #response'
+    it 'uses #with_etag block' do
+      client.stub(:post)
+      expect(campaign).to receive(:with_etag)
+      campaign.launch!
+    end
   end
 
   describe '#etag_path' do

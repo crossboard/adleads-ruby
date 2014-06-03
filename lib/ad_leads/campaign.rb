@@ -10,10 +10,6 @@ class AdLeads::Campaign < AdLeads::Base
   #   'creativeGroups' => creative_group.id
   # }
 
-  def create!(params)
-    self.response = client.post(root_path, params)
-  end
-
   def update!(params)
     client.post(campaign_path, params)
   end
@@ -23,7 +19,9 @@ class AdLeads::Campaign < AdLeads::Base
   end
 
   def launch!
-    client.post(launch_campaign_path, etag: etag)
+    with_etag do
+      client.post(launch_campaign_path, etag: etag)
+    end
   end
 
   def campaign_path

@@ -6,8 +6,8 @@ class AdLeads::CreativeGroup < AdLeads::Base
   #   'privacyPolicyUrl' => 'http://privacy_url'
   # }
 
-  def create!(params)
-    self.response = client.post('/creativegroups', params)
+  def root_path
+    '/creativegroups'
   end
 
 end

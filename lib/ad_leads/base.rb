@@ -1,6 +1,10 @@
 class AdLeads::Base
   attr_accessor :response
 
+  def create!(params)
+    self.response = client.post(root_path, params)
+  end
+
   def client
     @client ||= AdLeads::Client.new
   end

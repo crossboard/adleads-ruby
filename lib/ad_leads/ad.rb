@@ -12,8 +12,8 @@ class AdLeads::Ad < AdLeads::Base
     @creative_group_id = creative_group_id
   end
 
-  def create!(params)
-    self.response = client.post("/creativegroups/#{creative_group_id}/creatives", params)
+  def root_path
+    "/creativegroups/#{creative_group_id}/creatives"
   end
 
 end
