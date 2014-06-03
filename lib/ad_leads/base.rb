@@ -1,8 +1,12 @@
 class AdLeads::Base
   attr_accessor :response
 
+  def client
+    @client ||= AdLeads::Client.new
+  end
+
   def id
-    JSON.parse(response.body)['data'].first
+    @id ||= JSON.parse(response.body)['data'].first
   end
 
   def status

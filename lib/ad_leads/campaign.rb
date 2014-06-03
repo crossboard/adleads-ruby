@@ -1,23 +1,45 @@
 class AdLeads::Campaign < AdLeads::Base
   include AdLeads::Etag
 
+  # params = {
+  #   'name' => 'test',
+  #   'verticals' =>  82,
+  #   'offerIncentiveCategory' => 5,
+  #   'collectedFields' => 'firstname,lastname,email,companyname',
+  #   'budget' => 50,
+  #   'creativeGroups' => creative_group.id
+  # }
+
   def create!(params)
-    client.create_campaign(params)
+    self.response = client.post(root_path, params)
   end
 
-  def update(params)
-    client.update_campaign(id, params)
+  def update!(params)
+    client.post(campaign_path, params)
   end
 
   def verify!
-    client.verify_campaign(id)
+    client.get(verify_campaign_path)
   end
 
   def launch!
-    client.launch_campaign(id, etag)
+    client.post(launch_campaign_path, etag: etag)
   end
 
-  def etag_path
-    ['campaigns', id].join('/')
+  def campaign_path
+    root_path + "/#{id}"
+  end
+  alias :etag_path :campaign_path
+
+  def launch_campaign_path
+    campaign_path + '/launch'
+  end
+
+  def root_path
+    '/campaigns'
+  end
+
+  def verify_campaign_path
+    campaign_path + '/plan'
   end
 end

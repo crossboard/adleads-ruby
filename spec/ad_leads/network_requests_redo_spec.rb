@@ -14,32 +14,30 @@ describe AdLeads::Client do
     describe 'Ad Campaign' do
       it 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
 
-        params = {
-          'name' => 'test creative group',
-          'productName' =>  'test product',
-          'privacyPolicyUrl' => 'http://privacy_url'
-        }
+        # params = {
+        #   'name' => 'test creative group',
+        #   'productName' =>  'test product',
+        #   'privacyPolicyUrl' => 'http://privacy_url'
+        # }
 
-        creative_group = AdLeads::CreativeGroup.new(params)
-        creative_group.create!
+        # creative_group = AdLeads::CreativeGroup.new
+        # creative_group.create!(params)
 
-        params = {
-          'type' => 'Mobile',
-          'name' =>  'test mobile ad',
-          'headerText' => 'get your ad on this phone today',
-          'bodyText' => 'this is mobile ad body copy'
-        }
+        # params = {
+        #   'type' => 'Mobile',
+        #   'name' =>  'test mobile ad',
+        #   'headerText' => 'get your ad on this phone today',
+        #   'bodyText' => 'this is mobile ad body copy'
+        # }
 
-        ad = AdLeads::Ad.new(params, creative_group.id)
-        ad.create!
+        # ad = AdLeads::Ad.new(creative_group.id)
+        # ad.create!(params)
 
-        params = { 'type' => 'LogoImage' }
+        # params = { 'type' => 'LogoImage' }
 
-        image = AdLeads::Image.new(
-          { params: params, creative_group_id: creative_group.id, ad_id: ad.id }
-        )
-        image.create!
-        image.upload_file(file)
+        # image = AdLeads::Image.new( { creative_group_id: creative_group.id, ad_id: ad.id } )
+        # image.create!(params)
+        # image.upload!(file)
 
         params = {
           'name' => 'test',

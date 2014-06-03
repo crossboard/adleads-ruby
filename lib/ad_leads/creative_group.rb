@@ -1,11 +1,13 @@
 class AdLeads::CreativeGroup < AdLeads::Base
-  attr_accessor :params
 
-  def initialize(params)
-    @params = params
+  # params = {
+  #   'name' => 'test creative group',
+  #   'productName' =>  'test product',
+  #   'privacyPolicyUrl' => 'http://privacy_url'
+  # }
+
+  def create!(params)
+    self.response = client.post('/creativegroups', params)
   end
 
-  def create
-    self.response = client.create_creative_group(params)
-  end
 end

@@ -17,23 +17,6 @@ module  AdLeads
       request(:post, path, params.merge(etag: etag))
     end
 
-    def create_ad(creative_group_id, type)
-      post("/creativegroups/#{creative_group_id}/creatives", type)
-    end
-
-    def create_campaign(params)
-      post('/campaigns', params)
-    end
-
-    def create_content_holder(ids, type)
-      path = "/creativegroups/#{ids[:group]}/creatives/#{ids[:creative]}/images"
-      post(path, type)
-    end
-
-    def create_creative_group(params)
-      post('/creativegroups', params)
-    end
-
     def get_campaign_etag(ad_campaign_id)
       response = get("/campaigns/#{ad_campaign_id}")
       response.headers['ETag']
@@ -52,28 +35,9 @@ module  AdLeads
       get("/reports/campaign/report", params)
     end
 
-    def launch_campaign(ad_campaign_id, etag, params = {})
-      path = "/campaigns/#{ad_campaign_id}/launch"
-      request(:post, path, params.merge(etag: etag))
-    end
-
     def pause_campaign(ad_campaign_id, etag)
       path = "/campaigns/#{ad_campaign_id}/pause"
       request(:post, path, etag: etag)
-    end
-
-    def update_campaign(ad_campaign_id, params = {})
-      post("/campaigns/#{ad_campaign_id}", params)
-    end
-
-    def upload_image(ids, etag, file)
-      path = "/creativegroups/#{ids[:group]}/creatives/#{ids[:creative]}/images/#{ids[:image]}/file"
-      params = { file: Faraday::UploadIO.new(file, 'image/jpeg') }
-      request(:post, path, params.merge(etag: etag))
-    end
-
-    def verify_campaign(ad_campaign_id)
-      get("/campaigns/#{ad_campaign_id}/plan")
     end
 
     def get(path, params = {})
