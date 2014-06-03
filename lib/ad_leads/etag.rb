@@ -8,7 +8,7 @@ module AdLeads::Etag
   end
 
   def etag
-    @etag ||= refresh_etag
+    @etag ||= refresh_etag!
   end
 
   def with_etag(&block)

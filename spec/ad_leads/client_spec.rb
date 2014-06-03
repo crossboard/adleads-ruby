@@ -6,7 +6,7 @@ describe AdLeads::Client do
 
   context 'connection' do
     let(:config_keys) { AdLeads::Configuration::VALID_CONFIG_KEYS }
-    let(:token) { '3141ac1f-5f8f-4376-8006-e2241b8b9f1a' }
+    let(:token) { '2f7622c3-da63-42e9-a3d8-4275f70f1f79' }
     before { client.stub(:token).and_return(token) }
 
     it 'inherits config' do

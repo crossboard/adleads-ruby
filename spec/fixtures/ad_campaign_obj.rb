@@ -1,20 +1,24 @@
 {
+  creative_group_info: {
+    'name' => 'Creative Group Name',
+    'productName' =>  promotion.name,
+    'privacyPolicyUrl' => 'http://privacy_url' # ask dave
+  },
+  ad_info: {
+    'type' => ad_content.kind,
+    'name' =>  ad_content.name,
+    'headerText' => ad_content.header,
+    'bodyText' => ad_content.body
+  },
+  image_info: {
+    'type' => image.kind
+  },
   campaign_info: {
-    publisher_id: '12345',
-    promotion_id: '12345',
-    targeting: '{}',
-    spend: 250,
-    time_start: 011220131212,
-    time_start: 011220131412,
-    name: 'My campaign'
-    },
-  content_info: {
-    name: 'ad name',
-    type: 'Mobile',
-    headerText: 'get your ad on this phone today',
-    bodyText: 'this is mobile ad body copy',
-    privacy: 'http://privacy_url',
-    image_type: 'logoImage',
-    file: 'test.jpg'
+    'name' => ad_campaign.name,
+    'verticals' =>  ad_campaign.verticals,
+    'offerIncentiveCategory' => ad_campaign.offer_incentive_category,
+    'collectedFields' => ad_campaign.collected_fields,
+    'budget' => ad_campaign.spend,
+    'creativeGroups' => creative_group.id
   }
 }

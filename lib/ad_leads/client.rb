@@ -17,18 +17,9 @@ module  AdLeads
       request(:post, path, params.merge(etag: etag))
     end
 
-    def get_campaign_etag(ad_campaign_id)
-      response = get("/campaigns/#{ad_campaign_id}")
-      response.headers['ETag']
-    end
-
     def get_campaign_status(ad_campaign_id)
       response = get("/campaigns/#{ad_campaign_id}")
       JSON.parse(response.body)['status']
-    end
-
-    def get_content_etag(ids)
-      get("/creativegroups/#{ids[:group]}/creatives/#{ids[:creative]}/images/#{ids[:image]}")
     end
 
     def get_reports(params)
@@ -83,9 +74,22 @@ module  AdLeads
         request.body = params if method == :post
       end
 
+      if response.status == 401
+        raise AuthError.new(<<-ERROR)
+          token: #{token},
+          endpoint: #{endpoint},
+          method: #{method},
+          path: #{path}",
+          body: #{response.body}
+        ERROR
+      else
+        response
+      end
+
       # rescue Faraday::Error::TimeoutError, Timeout::Error => error
       # rescue Faraday::Error::ClientError, JSON::ParserError => error
     end
-
   end
+
+  class AuthError < StandardError; end
 end
