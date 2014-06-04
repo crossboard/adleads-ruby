@@ -249,10 +249,14 @@ collectedFields:
 |childdob|
 |agerange|
 
-Acquire a token
+===============================================
 
-    clients = AdLeads::Client.new(client_id: 'xyz', principle: 'me@example.com')
-    client.ad_capmaign_create(params)
+    AdLeads::Client.configure do |config|
+      config.client_id = 'xyz',
+      config.principle = 'me@example.com',
+      config.private_key = 'private_key'
+    end
+    client = AdLeads::Client.new
 
 ## Contributing
 

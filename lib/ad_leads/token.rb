@@ -1,5 +1,3 @@
-require 'faraday'
-require 'json'
 module  AdLeads
 
   class Token
@@ -20,11 +18,11 @@ module  AdLeads
         scope: 'campaign_read,campaign_write,reports',
         exp: Time.now.utc.to_i + (5*60),
       }
-      JWT.encode(claims, private_key, 'RS256')
+      JWT.encode(claims, rsa_key, 'RS256')
     end
 
-    def private_key
-      @private_key ||= OpenSSL::PKey::RSA.new File.read('private_key.pem')
+    def rsa_key
+      @rsa_key ||= OpenSSL::PKey::RSA.new(private_key)
     end
 
     def token
