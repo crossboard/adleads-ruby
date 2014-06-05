@@ -25,7 +25,11 @@ class AdLeads::Image < AdLeads::Base
   end
 
   def image_upload_path
-    root_path + '/file'
+    [
+      root_path,
+      id,
+      'file'
+    ].join('/')
   end
 
   def etag_path

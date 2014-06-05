@@ -4,7 +4,7 @@ describe AdLeads::Client do
   let!(:client) { AdLeads::Client.new }
   let(:connection) { client.connection }
   let(:creative_group_id) { 12858 }
-  let(:token) { '2f7622c3-da63-42e9-a3d8-4275f70f1f79' }
+  let(:token) { '99d3492c-f82e-40c1-ac12-95a3c3326edc' }
   let(:file) { './spec/fixtures/test.jpg' }
 
   before do
@@ -14,7 +14,7 @@ describe AdLeads::Client do
 
   context 'Network Requests' do
     describe 'Ad Campaign' do
-      xit 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
+      it 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
 
         params = {
           'name' => 'Creative Group Name',

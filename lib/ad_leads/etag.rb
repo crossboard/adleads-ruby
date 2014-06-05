@@ -4,22 +4,27 @@ module AdLeads::Etag
   end
 
   def refresh_etag!
-    @etag = client.get(etag_path)
+    @etag = client.get(etag_path).headers['Etag']
   end
 
   def etag
     @etag ||= refresh_etag!
   end
 
-  def with_etag(&block)
+  def with_etag(count = 1, &block)
+    raise MismatchError if count > 3
+
     response = yield
+    count += 1
 
-    retry_count = 0
-
-    while response.status == 412 && retry_count <= 1
-      retry_count += 1
+    if response.status == 412
       self.refresh_etag!
-      response = yield
+      with_etag(count) do
+        yield
+      end
     end
+
   end
+
+  class MismatchError < StandardError; end
 end

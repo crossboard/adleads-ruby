@@ -1,11 +1,14 @@
 require 'spec_helper'
 
+# TODO: Extract Etag specs!
+
 describe AdLeads::Image do
   let(:image) { AdLeads::Image.new( {creative_group_id: 1, ad_id: 1} ) }
   let(:client) { image.client }
   let(:params) { {} }
-  let(:bad_etag_response) { double(:http_response, status: 412) }
-  let(:http_success) { double(:http_response, status: 200) }
+  let(:success) { double(:http_response, status: 200) }
+  let(:etag_mismatch) { double(:http_response, status: 412) }
+  let(:new_etag) { double(:http_response, status: 200, headers: { 'Etag' => '123'} ) }
 
   it 'inherits from AdLeads::Base' do
     expect(image.class.ancestors).to include AdLeads::Base
@@ -24,32 +27,44 @@ describe AdLeads::Image do
     end
   end
 
+  describe '#refresh_etag' do
+    before { image.stub(:etag_path) { '/foo' } }
+    it 'sets @etag from response headers' do
+      expect(client).to receive(:get).with('/foo').and_return(new_etag)
+      image.refresh_etag!
+      expect(image.etag).to eq '123'
+    end
+  end
+
   describe '#upload!' do
     let(:file) { './spec/fixtures/test.jpg' }
-    before { image.stub(:etag) { 'Fake etag' } }
+    before do
+      image.stub(:etag) { 'Fake etag' }
+      image.stub(:id) { 1 }
+    end
 
     it 'posts to AdLeads::Image#image_upload_path' do
       image.stub(:image_upload_params) {{}}
       expect(client).to receive(:post).
-        with('/creativegroups/1/creatives/1/images/file', params).
-        and_return(http_success)
+        with('/creativegroups/1/creatives/1/images/1/file', params).
+        and_return(success)
       image.upload!(file)
     end
 
-    describe 'with bad etag' do
-      before { image.stub(:id) { 1 } }
-
+    context 'with Etag mismatch' do
       it 'retries post' do
-        expect(client).to receive(:post).once.and_return(bad_etag_response)
+        expect(client).to receive(:post).once.and_return(etag_mismatch)
         expect(image).to receive(:refresh_etag!).and_return(1)
-        expect(client).to receive(:post).once.and_return(http_success)
+        expect(client).to receive(:post).once.and_return(success)
         image.upload!(file)
       end
 
-      it 'tries only 3 times' do
-        expect(client).to receive(:post).and_return(bad_etag_response).exactly(3).times
-        image.stub(:refresh_etag!) { 1 }
-        image.upload!(file)
+      it 'raises EtagMismatchError' do
+        client.stub(:post) { etag_mismatch }
+        client.stub(:get) { new_etag }
+        expect {
+          image.upload!(file)
+        }.to raise_error AdLeads::Etag::MismatchError
       end
     end
   end

@@ -74,14 +74,23 @@ module  AdLeads
         request.body = params if method == :post
       end
 
-      if response.status == 401
+      case response.status
+      when 401
         raise AuthError.new(<<-ERROR)
           token: #{token},
+          method: #{method},
+          endpoint: #{endpoint},
+          path: #{path}",
+          body: #{response.body}
+        ERROR
+      when 500
+        raise ApiError.new(<<-ERROR)
           endpoint: #{endpoint},
           method: #{method},
           path: #{path}",
           body: #{response.body}
         ERROR
+
       else
         response
       end
@@ -92,4 +101,6 @@ module  AdLeads
   end
 
   class AuthError < StandardError; end
+  class ApiError < StandardError; end
 end
+2
