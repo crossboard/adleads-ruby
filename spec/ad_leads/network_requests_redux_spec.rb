@@ -14,7 +14,7 @@ describe AdLeads::Client do
 
   context 'Network Requests' do
     describe 'Ad Campaign' do
-      it 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
+      xit 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
 
         params = {
           'name' => 'Creative Group Name',
