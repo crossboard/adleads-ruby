@@ -1,6 +1,5 @@
 # AdLeads
-
-TODO: Write a gem description
+Wrapper for the Adleads JSON api.
 
 ## Installation
 
