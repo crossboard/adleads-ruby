@@ -1,5 +1,6 @@
 require 'faraday'
 require 'json'
+require 'logger'
 
 module  AdLeads
   class Client
@@ -98,6 +99,7 @@ module  AdLeads
 
   class Error < StandardError
     def initialize(message)
+      Logger.new(STDOUT).error message
       super(message)
     end
   end
