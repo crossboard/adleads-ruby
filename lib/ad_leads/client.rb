@@ -87,7 +87,7 @@ module  AdLeads
       case response.status
       when 400 then raise ArgError.new response.body
       when 401 then raise AuthError.new "token: #{token}" + response.body.to_s
-      when 500 then raise ApiError.new response.body
+      when 500 then raise ApiServerError.new response.body
       else
         response
       end
@@ -97,13 +97,13 @@ module  AdLeads
 
   end
 
-  class Error < StandardError
+  class ApiError < StandardError
     def initialize(message)
       Logger.new(STDOUT).error message
       super(message)
     end
   end
-  class AuthError < Error; end
-  class ApiError < Error; end
-  class ArgError < Error; end
+  class AuthError < ApiError; end
+  class ApiServerError < ApiError; end
+  class ArgError < ApiError; end
 end
