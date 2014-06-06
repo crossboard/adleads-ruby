@@ -58,6 +58,7 @@ module  AdLeads
         faraday.authorization :Bearer, token
         faraday.adapter  :httpclient
         faraday.request :url_encoded
+        # faraday.response :logger
       end
     end
 
@@ -74,33 +75,33 @@ module  AdLeads
         request.body = params if method == :post
       end
 
-      case response.status
-      when 401
-        raise AuthError.new(<<-ERROR)
-          token: #{token},
-          method: #{method},
-          endpoint: #{endpoint},
-          path: #{path}",
-          body: #{response.body}
-        ERROR
-      when 500
-        raise ApiError.new(<<-ERROR)
-          endpoint: #{endpoint},
-          method: #{method},
-          path: #{path}",
-          body: #{response.body}
-        ERROR
+        # Logger.new(STDOUT).info [
+        #   '====================',
+        #   endpoint: endpoint,
+        #   method: method,
+        #   path: path,
+        #   body: response.body
+        # ].join("\n")
 
+      case response.status
+      when 400 then raise ArgError.new response.body
+      when 401 then raise AuthError.new "token: #{token}" + response.body.to_s
+      when 500 then raise ApiError.new response.body
       else
         response
       end
-
       # rescue Faraday::Error::TimeoutError, Timeout::Error => error
       # rescue Faraday::Error::ClientError, JSON::ParserError => error
     end
+
   end
 
-  class AuthError < StandardError; end
-  class ApiError < StandardError; end
+  class Error < StandardError
+    def initialize(message)
+      super(message)
+    end
+  end
+  class AuthError < Error; end
+  class ApiError < Error; end
+  class ArgError < Error; end
 end
-2
