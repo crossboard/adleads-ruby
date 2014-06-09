@@ -19,7 +19,7 @@ class AdLeads::Image < AdLeads::Base
 
   def image_upload_params(file)
     {
-      file: Faraday::UploadIO.new(open(file), 'image/jpeg'),
+      file: Faraday::UploadIO.new(file, 'image/jpeg'),
       etag: etag
     }
   end
