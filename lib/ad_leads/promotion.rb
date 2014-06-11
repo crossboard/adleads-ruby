@@ -1,4 +1,4 @@
-module  AdLeads
+module AdLeads
   class Promotion
     def self.promotion_params(deal)
       {
