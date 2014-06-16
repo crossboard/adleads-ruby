@@ -26,14 +26,14 @@ describe AdLeads::Client::Campaign do
       expect(client).to receive(:create_ad).with(1, ad_opts)
       expect(client).to receive(:create_image).with(1, 1, image_opts)
       expect(client).to receive(:upload_image).with(1, 1, 1, file)
-      expect(client).to receive(:create_campaign).with(campaign_opts)
-      client.create_complete_campaign(1, complete_campaign_opts)
+      expect(client).to receive(:create_campaign).with(1, campaign_opts)
+      client.create_complete_campaign(complete_campaign_opts)
     end
   end
 
   describe '#create_campaign' do
     it 'creates a campaign' do
-      expect(client).to receive(:post).with('/campaigns', options)
+      expect(client).to receive(:post).with('/campaigns', {creativeGroups: 1})
       client.create_campaign(1, options)
     end
   end
