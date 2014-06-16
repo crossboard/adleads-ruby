@@ -1,24 +1,13 @@
 require 'spec_helper'
 
-describe AdLeads::Ad do
-  let(:ad) { AdLeads::Ad.new(1) }
-  let(:client) { ad.client }
-  let(:params) { {} }
+describe AdLeads::Client::Ad do
+  let(:client) { AdLeads::Client.new }
+  let(:options) { {} }
 
-  it 'inherits from AdLeads::Base' do
-    expect(ad.class.ancestors).to include AdLeads::Base
-  end
-
-  describe '#create!' do
-    it 'posts to Ad Leads ad endpoint for creatives' do
-      expect(client).to receive(:post).with('/creativegroups/1/creatives', params)
-      ad.create!(params)
-    end
-
-    it 'assigns #response' do
-      client.stub(:post) { 'Foobar' }
-      ad.create!(params)
-      expect(ad.response).to eq 'Foobar'
+  describe '#create_ad' do
+    it 'creates an ad' do
+      expect(client).to receive(:post).with('/creativegroups/1/creatives', options)
+      client.create_ad(1, options)
     end
   end
 

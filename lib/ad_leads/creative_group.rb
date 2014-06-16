@@ -1,13 +1,9 @@
-class AdLeads::CreativeGroup < AdLeads::Base
-
-  # params = {
-  #   'name' => 'test creative group',
-  #   'productName' =>  'test product',
-  #   'privacyPolicyUrl' => 'http://privacy_url'
-  # }
-
-  def root_path
-    '/creativegroups'
+module AdLeads
+  class Client
+    module CreativeGroup
+      def create_creative_group(options)
+        post '/creativegroups', options
+      end
+    end
   end
-
 end

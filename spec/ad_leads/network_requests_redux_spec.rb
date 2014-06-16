@@ -1,10 +1,10 @@
 require 'spec_helper'
+require 'pry'
 
 describe AdLeads::Client do
   let!(:client) { AdLeads::Client.new }
   let(:connection) { client.connection }
-  let(:creative_group_id) { 12858 }
-  let(:token) { '99d3492c-f82e-40c1-ac12-95a3c3326edc' }
+  let(:token) { '55bd8390-9cd9-4b69-9966-1a10a9bc5591' }
   let(:file) { './spec/fixtures/test.jpg' }
 
   before do
@@ -14,49 +14,82 @@ describe AdLeads::Client do
 
   context 'Network Requests' do
     describe 'Ad Campaign' do
-      xit 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
+      it 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
 
-        params = {
+        options = {
           'name' => 'Creative Group Name',
           'productName' =>  'amazing product',
           'privacyPolicyUrl' => 'http://privacy_url'
         }
 
-        creative_group = AdLeads::CreativeGroup.new
-        creative_group.create!(params)
+        client.create_creative_group(options)
+        creative_id = client.last_response_id
 
-        params = {
+        options = {
           'type' => 'Mobile',
           'name' =>  'Ad name',
           'headerText' => 'get your ad on this phone today',
           'bodyText' => 'this is mobile ad body copy'
         }
 
-        ad = AdLeads::Ad.new(creative_group.id)
-        ad.create!(params)
+        client.create_ad(creative_id, options)
+        ad_id = client.last_response_id
 
-        params = { 'type' => 'LogoImage' }
+        options = { 'type' => 'LogoImage' }
 
-        image = AdLeads::Image.new( { creative_group_id: creative_group.id, ad_id: ad.id } )
-        image.create!(params)
-        image.upload!(file)
+        client.create_image(creative_id, ad_id, options)
+        image_id = client.last_response_id
+        client.upload_image(creative_id, ad_id, image_id, file)
 
-        params = {
+        options = {
           'name' => 'Campaign name',
           'verticals' =>  82,
           'offerIncentiveCategory' => 5,
           'collectedFields' => 'firstname,lastname,email,companyname',
           'budget' => 50,
-          'creativeGroups' => creative_group.id
+          'creativeGroups' => creative_id
         }
 
-        campaign = AdLeads::Campaign.new
-        campaign.create!(params)
-        campaign.verify!
-        campaign.launch!
+        client.create_campaign(options)
+        campaign_id = client.last_response_id
 
-        expect(campaign.response.status).to eq(200)
-        expect(JSON.parse(campaign.response.body)['result']).to eq true
+        client.verify_campaign(campaign_id)
+        response = client.launch_campaign(campaign_id)
+
+        expect(response.status).to eq(200)
+        expect(JSON.parse(response.body)['result']).to eq true
+      end
+
+      it 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
+        options = {
+          creative_group: {
+            'name' => 'Creative Group Name',
+            'productName' =>  'amazing product',
+            'privacyPolicyUrl' => 'http://privacy_url'
+          },
+          ad: {
+            'type' => 'Mobile',
+            'name' =>  'Ad name',
+            'headerText' => 'get your ad on this phone today',
+            'bodyText' => 'this is mobile ad body copy'
+          },
+          image: { 'type' => 'LogoImage' },
+          file: file,
+          campaign: {
+            'name' => 'Campaign name',
+            'verticals' =>  82,
+            'offerIncentiveCategory' => 5,
+            'collectedFields' => 'firstname,lastname,email,companyname',
+            'budget' => 50
+        }}
+
+        client.create_complete_campaign(options)
+        campaign_id = client.last_response_id
+        client.verify_campaign(campaign_id)
+        client.launch_campaign(campaign_id)
+
+        expect(client.last_response.status).to eq(200)
+        expect(JSON.parse(client.last_response.body)['result']).to eq true
       end
     end
   end
