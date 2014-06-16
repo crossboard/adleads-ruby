@@ -14,7 +14,7 @@ describe AdLeads::Client do
 
   context 'Network Requests' do
     describe 'Ad Campaign' do
-      it 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
+      xit 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
 
         options = {
           'name' => 'Creative Group Name',
@@ -60,7 +60,7 @@ describe AdLeads::Client do
         expect(JSON.parse(response.body)['result']).to eq true
       end
 
-      it 'uploads logo image, creates campaign using logo image, verifies and launches ad campaign' do
+      xit 'creates complete campaign in one step, verifies and launches ad campaign' do
         options = {
           creative_group: {
             'name' => 'Creative Group Name',
