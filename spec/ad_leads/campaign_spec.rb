@@ -1,69 +1,78 @@
 require 'spec_helper'
 
-describe AdLeads::Campaign do
-  let(:campaign) { AdLeads::Campaign.new() }
-  let(:client) { campaign.client }
-  let(:params) { {} }
+describe AdLeads::Client::Campaign do
+  let(:client) { AdLeads::Client.new }
+  let(:options) { {} }
   let(:http_success) { double(:http_success, status: 200) }
 
-  it 'inherits from AdLeads::Base' do
-    expect(campaign.class.ancestors).to include AdLeads::Base
+  describe '#create_complete_campaign' do
+    let(:creative_opts) { {} }
+    let(:ad_opts) { {} }
+    let(:image_opts) { {} }
+    let(:file) { './spec/fixtures/test.jpg' }
+    let(:campaign_opts) { {} }
+    let(:complete_campaign_opts) {{
+      creative_group: creative_opts,
+      ad: ad_opts,
+      image: image_opts,
+      file: file,
+      campaign: campaign_opts
+    }}
+
+    it 'creates a creative group, ad, image, and campaign' do
+      client.stub(:last_response_id) { 1 }
+
+      expect(client).to receive(:create_creative_group).with(creative_opts)
+      expect(client).to receive(:create_ad).with(1, ad_opts)
+      expect(client).to receive(:create_image).with(1, 1, image_opts)
+      expect(client).to receive(:upload_image).with(1, 1, 1, file)
+      expect(client).to receive(:create_campaign).with(1, campaign_opts)
+      client.create_complete_campaign(complete_campaign_opts)
+    end
   end
 
-  describe '#create!' do
-    it 'posts to AdLeads::Campaign#root_path' do
-      expect(client).to receive(:post).with('/campaigns', params)
-      campaign.create!(params)
-    end
-
-    it 'assigns #response' do
-      client.stub(:post) { 'Foobar' }
-      campaign.create!(params)
-      expect(campaign.response).to eq 'Foobar'
+  describe '#create_campaign' do
+    it 'creates a campaign' do
+      expect(client).to receive(:post).with('/campaigns', {creativeGroups: 1})
+      client.create_campaign(1, options)
     end
   end
 
-  describe '#update!' do
-    before { campaign.instance_variable_set(:@id, 1) }
-
-    it 'posts to AdLeads::Campaign#campaign_path' do
-      expect(client).to receive(:post).with('/campaigns/1', params)
-      campaign.update!(params)
+  describe '#update_campaign' do
+    it 'updates the respective campaign' do
+      expect(client).to receive(:post).with('/campaigns/1', options)
+      client.update_campaign(1, options)
     end
   end
 
-  describe '#verify!' do
-    before { campaign.instance_variable_set(:@id, 1) }
-
-    it 'sends a GET request to AdLeads::Campaign#verify_campaign_path' do
+  describe '#verify_campaign' do
+    it 'verifies the respective campaign' do
       expect(client).to receive(:get).with('/campaigns/1/plan')
-      campaign.verify!
+      client.verify_campaign(1)
     end
   end
 
-  describe '#launch!' do
-    before do
-      campaign.stub(:id) { 1 }
-      campaign.stub(:etag) { 'Fake etag' }
+  describe '#launch_campaign' do
+    it 'launches a campaign' do
+      etag_response = double :response, headers: { 'Etag' => 1 }
+      client.stub(:campaign_etag) { etag_response }
+      expect(client).to receive(:post).with('/campaigns/1/launch', {etag: 1} )
+      client.launch_campaign(1)
     end
 
-    it 'posts to AdLeads::Campaign#launch_campaign_path' do
-      expect(client).to receive(:post).with('/campaigns/1/launch', { etag: 'Fake etag'}).and_return(http_success)
-      campaign.launch!
+    it 'gets etag' do
+      expect(client).to receive(:get).with('/campaigns/1')
+      client.send(:campaign_etag, 1)
     end
 
-    it 'uses #with_etag block' do
-      client.stub(:post)
-      expect(campaign).to receive(:with_etag)
-      campaign.launch!
-    end
-  end
-
-  describe '#etag_path' do
-    before { campaign.instance_variable_set(:@id, 1) }
-
-    it 'is an alias for #campaign_path' do
-      expect(campaign.etag_path).to eq campaign.campaign_path
+    context 'with EtagMismatchError' do
+      it 'retries launch a maximum of three times' do
+        etag_response = double :response, headers: { 'Etag' => 1 }
+        client.stub(:campaign_etag) { etag_response }
+        client.stub(:post) { raise AdLeads::EtagMismatchError.new 'Error' }
+        expect(client).to receive(:post).exactly(3).times
+        client.launch_campaign(1)
+      end
     end
   end
 end

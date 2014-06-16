@@ -1,5 +1,4 @@
-module  AdLeads
-
+module AdLeads
   class Token
     attr_accessor *Configuration::VALID_CONFIG_KEYS
 

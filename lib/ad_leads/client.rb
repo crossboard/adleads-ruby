@@ -1,9 +1,12 @@
-require 'faraday'
-require 'json'
-
-module  AdLeads
+module AdLeads
   class Client
+    include AdLeads::Client::CreativeGroup
+    include AdLeads::Client::Ad
+    include AdLeads::Client::Image
+    include AdLeads::Client::Campaign
+
     attr_accessor *Configuration::VALID_CONFIG_KEYS
+    attr_reader :last_response
 
     def initialize(options={})
       merged_options = AdLeads.options.merge(options)
@@ -39,6 +42,10 @@ module  AdLeads
       request(:post, path, params)
     end
 
+    def last_response_id
+      JSON.parse(last_response.body)['data'].first
+    end
+
     private
 
     def etag_opts(etag)
@@ -58,6 +65,7 @@ module  AdLeads
         faraday.authorization :Bearer, token
         faraday.adapter  :httpclient
         faraday.request :url_encoded
+        # faraday.response :logger
       end
     end
 
@@ -74,33 +82,35 @@ module  AdLeads
         request.body = params if method == :post
       end
 
+        # Logger.new(STDOUT).info [
+        #   '====================',
+        #   endpoint: endpoint,
+        #   method: method,
+        #   path: path,
+        #   body: response.body
+        # ].join("\n")
+
       case response.status
-      when 401
-        raise AuthError.new(<<-ERROR)
-          token: #{token},
-          method: #{method},
-          endpoint: #{endpoint},
-          path: #{path}",
-          body: #{response.body}
-        ERROR
-      when 500
-        raise ApiError.new(<<-ERROR)
-          endpoint: #{endpoint},
-          method: #{method},
-          path: #{path}",
-          body: #{response.body}
-        ERROR
-
+      when 400 then raise ArgError.new response.body
+      when 401 then raise AuthError.new "token: #{token}" + response.body.to_s
+      when 412 then raise EtagMismatchError.new response.body
+      when 500 then raise ApiServerError.new response.body
       else
-        response
+        @last_response = response
       end
-
       # rescue Faraday::Error::TimeoutError, Timeout::Error => error
       # rescue Faraday::Error::ClientError, JSON::ParserError => error
     end
   end
 
-  class AuthError < StandardError; end
-  class ApiError < StandardError; end
+  class ApiError < StandardError
+    def initialize(message)
+      Logger.new(STDOUT).error message
+      super(message)
+    end
+  end
+  class AuthError < ApiError; end
+  class ApiServerError < ApiError; end
+  class ArgError < ApiError; end
+  class EtagMismatchError < ApiError; end
 end
-2
