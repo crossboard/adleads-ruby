@@ -75,4 +75,13 @@ describe AdLeads::Client::Campaign do
       end
     end
   end
+
+  describe '#signup_delivery' do
+    let(:signup_opts) { {} }
+
+    it 'configures signup delivery for the campaign' do
+      expect(client).to receive(:post).with('/campaigns/1/signupdelivery', signup_opts)
+      client.signup_delivery(1, signup_opts)
+    end
+  end
 end
