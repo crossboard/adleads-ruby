@@ -4,8 +4,15 @@ require 'pry'
 describe AdLeads::Client do
   let!(:client) { AdLeads::Client.new }
   let(:connection) { client.connection }
-  let(:token) { '55bd8390-9cd9-4b69-9966-1a10a9bc5591' }
+  let(:token) { '2b3fa296-48ab-4daa-accd-22d905476149' }
   let(:file) { './spec/fixtures/test.jpg' }
+  let(:signup_config) {{
+    'url' => 'http://url.com/subscribers',
+    'method' => 'POST',
+    'ad_campaign_id' => 'test_ad_campaign_id',
+    'auth_token' => 'test_token',
+    'dataSink' => 'RealtimeHTTP'
+  }}
 
   before do
     client.stub(:token).and_return(token)
@@ -88,6 +95,10 @@ describe AdLeads::Client do
         client.verify_campaign(campaign_id)
         client.launch_campaign(campaign_id)
 
+        expect(client.last_response.status).to eq(200)
+        expect(JSON.parse(client.last_response.body)['result']).to eq true
+
+        client.signup_delivery(campaign_id, signup_config )
         expect(client.last_response.status).to eq(200)
         expect(JSON.parse(client.last_response.body)['result']).to eq true
       end

@@ -35,6 +35,10 @@ module AdLeads
         retry unless remaining_tries.zero?
       end
 
+      def signup_delivery(campaign_id, options={})
+        post signup_delivery_path(campaign_id), options
+      end
+
       private
 
       def campaign_path(id)
@@ -48,6 +52,10 @@ module AdLeads
 
       def verify_campaign_path(id)
         campaign_path(id) + '/plan'
+      end
+
+      def signup_delivery_path(id)
+        campaign_path(id) + '/signupdelivery'
       end
 
       def campaign_etag(id)
