@@ -15,23 +15,8 @@ module AdLeads
       end
     end
 
-    def configure_campaign_signups(ad_campaign_id, etag, params = {})
-      path = "/campaigns/#{ad_campaign_id}/signupdelivery"
-      request(:post, path, params.merge(etag: etag))
-    end
-
-    def get_campaign_status(ad_campaign_id)
-      response = get("/campaigns/#{ad_campaign_id}")
-      JSON.parse(response.body)['status']
-    end
-
     def get_reports(params)
       get("/reports/campaign/report", params)
-    end
-
-    def pause_campaign(ad_campaign_id, etag)
-      path = "/campaigns/#{ad_campaign_id}/pause"
-      request(:post, path, etag: etag)
     end
 
     def get(path, params = {})
